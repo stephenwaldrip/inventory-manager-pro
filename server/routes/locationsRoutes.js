@@ -7,7 +7,8 @@ const {
   updateLocation,
   deleteLocation
 } = require('../controllers/locationsController');
-const { protect } = require('../middleware/authMiddleware');
+
+const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // Routes
 router.route('/')
@@ -17,6 +18,6 @@ router.route('/')
 router.route('/:id')
   .get(protect, getLocationById)
   .put(protect, updateLocation)
-  .delete(protect, deleteLocation);
+  .delete(protect, adminOnly, deleteLocation);
 
 module.exports = router;

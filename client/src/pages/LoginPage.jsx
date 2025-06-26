@@ -1,89 +1,58 @@
-// src/pages/LoginPage.jsx
-import React, { useState } from 'react';
+import { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 const LoginPage = () => {
-  const [isRegister, setIsRegister] = useState(false);
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
-    const payload = isRegister ? { username, email, password } : { email, password };
-
     try {
-      const response = await axios.post(endpoint, payload);
-      const { token } = response.data;
-      localStorage.setItem('token', token);
-      alert(`${isRegister ? 'Registration' : 'Login'} successful`);
-      navigate('/locations');
+      const res = await axios.post('/api/auth/login', { email, password });
+
+      const fullUser = {
+        ...res.data.user,   // should include name, email, role
+        token: res.data.token,
+      };
+
+      setUser(fullUser);
+      localStorage.setItem('user', JSON.stringify(fullUser));
+
+      navigate('/'); // or dashboard, wherever you want to send them
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Server error');
+      alert('Login failed. Please check your credentials.');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full space-y-8 p-10 border rounded bg-white shadow">
-        <h2 className="text-center text-2xl font-bold text-gray-900">
-          {isRegister ? 'Register' : 'Login'} to Inventory Manager Pro
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {isRegister && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Username</label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="mt-1 block w-full px-3 py-2 border rounded"
-              />
-            </div>
-          )}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1 block w-full px-3 py-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1 block w-full px-3 py-2 border rounded"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-          >
-            {isRegister ? 'Register' : 'Login'}
-          </button>
-        </form>
-        <div className="text-center">
-          <button
-            onClick={() => setIsRegister(!isRegister)}
-            className="text-blue-600 hover:underline mt-4"
-          >
-            {isRegister ? 'Already have an account? Log in' : 'Need an account? Register'}
-          </button>
-        </div>
-      </div>
-    </div>
+    <form onSubmit={handleLogin} className="p-4 max-w-sm mx-auto">
+      <h2 className="text-xl font-bold mb-4">Login</h2>
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        className="block w-full border p-2 mb-2"
+        required
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        className="block w-full border p-2 mb-4"
+        required
+      />
+      <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded">
+        Login
+      </button>
+    </form>
   );
 };
 

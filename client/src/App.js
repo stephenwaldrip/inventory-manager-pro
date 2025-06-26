@@ -1,28 +1,27 @@
-// client/src/App.js
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
+import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
-import LocationsPage from './pages/LocationsPage';
-import MaterialsPage from './pages/MaterialsPage';
+import UsersPage from './pages/UsersPage';
+import AdminRoute from './components/AdminRoute';
 
 function App() {
-  const isAuthenticated = !!localStorage.getItem('token');
-
   return (
-    <Router>
+    <div className="App">
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
-        {isAuthenticated ? (
-          <>
-            <Route path="/locations" element={<LocationsPage />} />
-            <Route path="/materials" element={<MaterialsPage />} />
-            <Route path="*" element={<Navigate to="/locations" />} />
-          </>
-        ) : (
-          <Route path="*" element={<Navigate to="/login" />} />
-        )}
+
+        {/* ✅ Admin-protected Users page */}
+        <Route
+          path="/users"
+          element={
+            <AdminRoute>
+              <UsersPage />
+            </AdminRoute>
+          }
+        />
       </Routes>
-    </Router>
+    </div>
   );
 }
 
